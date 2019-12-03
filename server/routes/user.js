@@ -1,14 +1,17 @@
 const express = require('express');
-const app = express();
 const bcrypt = require('bcryptjs');
 const _ = require('underscore');
 
 const User = require('../models/user');
+const { veriToken, veriRole } = require('../middlewares/autenticacion');
 
-app.get('/usuario', (req, res) => {
+const app = express();
+
+app.get('/usuario', veriToken, (req, res) => {
 
     let desde = req.query.desde || 0;
     desde = Number(desde);
+
     let limite = req.query.limite || 5;
     limite = Number(limite);
 
@@ -34,7 +37,7 @@ app.get('/usuario', (req, res) => {
         });
 });
 
-app.post('/usuario', (req, res) => {
+app.post('/usuario', [veriToken, veriRole], (req, res) => {
 
     let body = req.body;
 
@@ -63,7 +66,7 @@ app.post('/usuario', (req, res) => {
     });
 });
 
-app.put('/usuario/:id', (req, res) => {
+app.put('/usuario/:id', [veriToken, veriRole], (req, res) => {
 
     let id = req.params.id;
     let body = _.pick(req.body, ['nombre', 'email', 'img', 'rol', 'estado']);
@@ -85,7 +88,7 @@ app.put('/usuario/:id', (req, res) => {
     });
 });
 
-app.delete('/usuario/:id', (req, res) => {
+app.delete('/usuario/:id', [veriToken, veriRole], (req, res) => {
 
     let id = req.params.id;
     let cambiaEstado = {
