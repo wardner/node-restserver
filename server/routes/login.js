@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.CLIENT_ID);
+const bcrypt = require('bcryptjs');
 
 const app = express();
 
@@ -59,6 +60,7 @@ async function verify(token) {
         // Or, if multiple clients access the backend:
         //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
     });
+
     const payload = ticket.getPayload();
 
     return {
@@ -73,6 +75,7 @@ async function verify(token) {
 app.post('/google', async(req, res) => {
 
     let token = req.body.idtoken;
+
 
     let googleUser = await verify(token)
         .catch(e => {
@@ -101,7 +104,7 @@ app.post('/google', async(req, res) => {
                     }
                 });
             } else {
-                token = jwt.sign({
+                let token = jwt.sign({
                     user: userDB
                 }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
 
@@ -110,7 +113,6 @@ app.post('/google', async(req, res) => {
                     user: userDB,
                     token
                 });
-
             }
 
         } else {
@@ -131,7 +133,7 @@ app.post('/google', async(req, res) => {
                         err
                     });
                 }
-                token = jwt.sign({
+                let token = jwt.sign({
                     user: userDB
                 }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
 
@@ -147,5 +149,6 @@ app.post('/google', async(req, res) => {
     });
 
 });
+
 
 module.exports = app;
